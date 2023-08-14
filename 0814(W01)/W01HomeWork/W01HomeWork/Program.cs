@@ -33,9 +33,8 @@
             // 1-3 온도 변환기 만들기
             Console.WriteLine("온도 변환기");
             Console.Write("섭씨 온도를 입력하세요. : ");
-            string _celcius = Console.ReadLine();
-            float _doubleCelcius = float.Parse(_celcius);
-            float _fahrenheit = (_doubleCelcius * 9 / 5) + 32;
+            float _celcius = float.Parse(Console.ReadLine());
+            float _fahrenheit = (_celcius * 9 / 5) + 32;
 
             Console.WriteLine("변환된 화씨 온도 : " + _fahrenheit);
 
@@ -43,14 +42,11 @@
             Console.WriteLine("BMI 계산기");
 
             Console.Write("당신의 키를 입력해주세요. (소숫점 2자리 까지 입력해주세요.) (단위 : cm) : ");
-            string _height = Console.ReadLine();
+            float _height = float.Parse(Console.ReadLine());
             Console.Write("당신의 몸무게를 입력해주세요. (소숫점 2자리 까지 입력해주세요.) (단위 : kg) :");
-            string _weight = Console.ReadLine();
+            float _weight = float.Parse(Console.ReadLine());
 
-            float _floatHeight = float.Parse(_height);
-            float _floatWeight = float.Parse(_weight);
-
-            float _bmi = _floatWeight / (_floatHeight / 100* 2);
+            float _bmi = _weight / (_height / 100* 2);
             string _bmiResult = _bmi.ToString("F2");
             Console.WriteLine($"당신의 BMI 수치는 {_bmiResult} 입니다.");
 
