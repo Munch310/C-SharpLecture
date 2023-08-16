@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnakeGame", "SnakeGame\SnakeGame.csproj", "{E5E71CA7-A196-4323-8834-05057A850E53}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Destructor", "Destructor\Destructor.csproj", "{8A5BF5EB-7EA3-4976-95BD-CDA51DE83F0D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E5E71CA7-A196-4323-8834-05057A850E53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5E71CA7-A196-4323-8834-05057A850E53}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E5E71CA7-A196-4323-8834-05057A850E53}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E5E71CA7-A196-4323-8834-05057A850E53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A5BF5EB-7EA3-4976-95BD-CDA51DE83F0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A5BF5EB-7EA3-4976-95BD-CDA51DE83F0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A5BF5EB-7EA3-4976-95BD-CDA51DE83F0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A5BF5EB-7EA3-4976-95BD-CDA51DE83F0D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {43881276-9D01-403F-98F5-85DA9D61FB5B}
+		SolutionGuid = {29434C91-BFFC-46D2-AFDB-D02E3BCEF040}
 	EndGlobalSection
 EndGlobal
