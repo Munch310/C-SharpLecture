@@ -1,198 +1,235 @@
 ﻿namespace SnakeGame
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Xml.Linq;
 
     class Program
     {
         static void Main(string[] args)
         {
-            // 뱀의 초기 위치와 방향을 설정하고, 그립니다.
-            Point p = new Point(4, 5, '*');
-            Snake snake = new Snake(p, 4, Direction.RIGHT); // 인자가 3개.
-            snake.Draw(); // 뱀을 형상화
+            Map _m = new Map();
+            Food _f = new Food(_m);
+            Snake _s = new Snake(_m);
 
-            // 음식의 위치를 무작위로 생성하고, 그립니다.
-            FoodCreator foodCreator = new FoodCreator(80, 20, '$');
-            Point food = foodCreator.CreateFood();
-            food.Draw();
 
-            // 게임 루프: 이 루프는 게임이 끝날 때까지 계속 실행됩니다.
             while (true)
             {
-                // 키 입력이 있는 경우에만 방향을 변경합니다.
                 if (Console.KeyAvailable)
                 {
                     ConsoleKeyInfo _keyInfo = Console.ReadKey();
-                    switch (_keyInfo.Key)
-                    {
-                        case ConsoleKey.UpArrow:
-                            snake.snakeDirection(Direction.UP);
-                            break;
-                        case ConsoleKey.DownArrow:
-                            snake.snakeDirection(Direction.DOWN);
-                            break;
-                        case ConsoleKey.RightArrow:
-                            snake.snakeDirection(Direction.RIGHT);
-                            break;
-                        case ConsoleKey.LeftArrow:
-                            snake.snakeDirection(Direction.LEFT);
-                            break;
-                        default:
-                            break;
-                    }
+                    _s.SnakeKey(_keyInfo.Key);
                 }
-                snake.Move(food);
 
-                // 뱀이 이동하고, 음식을 먹었는지, 벽이나 자신의 몸에 부딪혔는지 등을 확인하고 처리하는 로직을 작성하세요.
-                // 이동, 음식 먹기, 충돌 처리 등의 로직을 완성하세요.
+                Console.Clear();
+                _s.Move();
+                _m.DrawMap();
+                _f.CreateFood();
 
-                Thread.Sleep(100); // 게임 속도 조절 (이 값을 변경하면 게임의 속도가 바뀝니다)
+                // 
+                Thread.Sleep(1000 / 144);
+            }
+        }
+    }
 
-                // 뱀의 상태를 출력합니다 (예: 현재 길이, 먹은 음식의 수 등)
+    // 음식 클래스
+    public class Food
+    {
+        private Map _map;
+        private Random _random;
+
+        public Food(Map map)
+        {
+            _map = map;
+            _random = new Random();
+        }
+
+        public void CreateFood()
+        {
+            int _x, _y;
+
+            if (_random.Next(0,100) < 5) // 5% < n, n으로 확률 조절 가능
+            {
+                do
+                {
+                    _x = _random.Next(1, _map._maxMapCol - 1);
+                    _y = _random.Next(1, _map._maxMapRow - 1);
+                } while (_map.GetCell(_x, _y) != '○');
+
+                _map.SetCell(_x, _y, '★'); // 음식 생성
             }
         }
     }
 
     public class Snake
     {
-        private List<Point> _snakeBody; // Generic, Point의 객체를 LIst로 관리할 수 있음.
+        private Map _map;
+        private List<(int _col, int _row)> _snakeBody; // 뱀 바디 저장
         private Direction _direction;
 
-
-        public Snake(Point _initPosition, int _initLength, Direction _initDirection)
+        public Snake(Map map)
         {
-            _snakeBody = new List<Point>();
-            _direction = _initDirection;
+            _map = map;
+            _snakeBody = new List<(int _col, int _row)>();
+            _direction = Direction.RIGHT;
 
-            // 길이는 0부터 
-            for (int i = 0; i < _initLength; i++)
+            int _snakeInitX = _map._maxMapCol / 2;
+            int _snakeInitY = _map._maxMapRow / 2;
+
+            // 초기 길이를 설정
+            for (int i = 0; i < 4; i++)
             {
-                int _newX = _initPosition.x - i;
-                int _newY = _initPosition.y;
-                Point _plusBody = new Point(_newX, _newY, '*');
-                _snakeBody.Add(_plusBody);
-            }
-        }
-        public void Draw()
-        {
-            foreach (Point _body in _snakeBody)
-            {
-                Console.SetCursorPosition(_body.x, _body.y);
-                Console.Write(_body.sym);
+                _snakeBody.Add((_snakeInitX - i, _snakeInitY));
+                _map.SetCell(_snakeInitX - i, _snakeInitY, '●');
             }
         }
 
-        public void Move(Point food)
+        public void SnakeKey(ConsoleKey _key)
         {
-            Point _snakeHead = _snakeBody.First();
-            Point _newHead = new Point(_snakeHead.x, _snakeHead.y, _snakeHead.sym);
+            switch (_key)
+            {
+                case ConsoleKey.UpArrow:
+                    _direction = Direction.UP;
+                    break;
+                case ConsoleKey.DownArrow:
+                    _direction = Direction.DOWN;
+                    break;
+                case ConsoleKey.LeftArrow:
+                    _direction = Direction.LEFT;
+                    break;
+                case ConsoleKey.RightArrow:
+                    _direction = Direction.RIGHT;
+                    break;
+            }
+        }
+
+        public void Move()
+        {
+            int _currentHeadX = _snakeBody[0]._col;
+            int _currentHeadY = _snakeBody[0]._row;
+            int _newSnakeHeadX = _currentHeadX;
+            int _newSnakeHeadY = _currentHeadY;
 
             switch (_direction)
             {
                 case Direction.UP:
-                    _newHead.y--;
+                    _newSnakeHeadX--;
                     break;
                 case Direction.DOWN:
-                    _newHead.y++;
-                    break;
-                case Direction.RIGHT:
-                    _newHead.x++;
+                    _newSnakeHeadX++;
                     break;
                 case Direction.LEFT:
-                    _newHead.x--;
+                    _newSnakeHeadY--;
                     break;
-                default:
+                case Direction.RIGHT:
+                    _newSnakeHeadY++;
                     break;
             }
+            // 머리 위치 리스트에 추가
+            if (_map.GetCell(_newSnakeHeadX, _newSnakeHeadY) == '★')
+            {
+                _snakeBody.Insert(0, (_newSnakeHeadX, _newSnakeHeadY)); // 뱀 머리 추가
+                _map.SetCell(_newSnakeHeadX, _newSnakeHeadY, '●'); // 새로운 머리 위치 설정
+            }
+            // 자신의 몸에 부딪힐 경우
+            else if (_map.GetCell(_newSnakeHeadX, _newSnakeHeadY) == '●')
+            {
+                Console.WriteLine("뱀이 벽에 닿았습니다! 게임 오버!");
+                Environment.Exit(0);
+            }
+            else
+            {
+                // 기존 꼬리 위치에 '○' 설정
+                int tailX = _snakeBody[_snakeBody.Count - 1]._col;
+                int tailY = _snakeBody[_snakeBody.Count - 1]._row;
+                _map.SetCell(tailX, tailY, '○'); // 꼬리 위치 비우기
+                _snakeBody.RemoveAt(_snakeBody.Count - 1); // 꼬리 제거
 
-            _snakeBody.Insert(0, _newHead);
-
-
-            Point _tail = _snakeBody.Last();
-            _tail.Clear();
-            _snakeBody.Remove(_tail);
-
-            Draw();
-        }
-
-        public void snakeDirection(Direction _newDirection)
-        {
-            _direction = _newDirection;
-        }
-
-    }
-
-    public class FoodCreator
-    {
-        private int _foodPosX;
-        private int _foodPosY;
-        private char _foodSym;
-        public FoodCreator(int foodPosX, int foodPosY, char foodSym)
-        {
-            _foodPosX = foodPosX;
-            _foodPosY = foodPosY;
-            _foodSym = foodSym;
-        }
-
-        public Point CreateFood()
-        {
-            return new Point(_foodPosX, _foodPosY, _foodSym);
+                _snakeBody.Insert(0, (_newSnakeHeadX, _newSnakeHeadY)); // 뱀 머리 추가
+                _map.SetCell(_newSnakeHeadX, _newSnakeHeadY, '●'); // 새로운 머리 위치 설정
+            }
         }
     }
 
-    public class Point
+    // 게임 맵
+    public class Map
     {
-        public int x { get; set; }
-        public int y { get; set; }
-        public char sym { get; set; }
+        public int _maxMapCol = 15;
+        public int _maxMapRow = 15;
 
-        // Point 클래스 생성자
-        public Point(int _x, int _y, char _sym)
+        private char[,] _map;
+
+        public Map()
         {
-            x = _x;
-            y = _y;
-            sym = _sym;
+            // 행열 순서
+            _map = new char[_maxMapCol, _maxMapRow];
+            InitMap();
         }
 
-        // 점을 그리는 메서드
-        public void Draw()
+
+        // 프로퍼티를 사용하면 더 좋을듯!
+        // 셀에 값 설정
+        public void SetCell(int x, int y, char value)
         {
-            Console.SetCursorPosition(x, y);
-            Console.Write(sym);
+            _map[x, y] = value;
         }
 
-        // 점을 지우는 메서드
-        public void Clear()
+        // 셀의 값 반환
+        public char GetCell(int x, int y)
         {
-            sym = ' ';
-            Draw();
+            if (x >= 0 && x < _maxMapCol && y >= 0 && y < _maxMapRow)
+            {
+                return _map[x, y];
+            }
+            else
+            {
+                Console.WriteLine("뱀이 자신의 몸에 부딪혔습니다! 게임 오버!");
+                Environment.Exit(0);
+                // 화면 바깥으로 나갔을 때 예외 처리
+                throw new IndexOutOfRangeException();
+            }
+        }
+        // 맵 초기화 메서드
+        public void InitMap()
+        {
+            for (int x = 0; x < _maxMapCol; x++)
+            {
+                for (int y = 0; y < _maxMapRow; y++)
+                {
+                    _map[x, y] = '○';
+                }
+            }
         }
 
-        // 두 점이 같은지 비교하는 메서드
-        public bool IsHit(Point p)
+        // 맵 그리는 메서드
+        public void DrawMap()
         {
-            return p.x == x && p.y == y;
+            for (int x = 0; x < _maxMapCol; x++)
+            {
+                for (int y = 0; y < _maxMapRow; y++)
+                {
+                    if (IsBorderCell(x, y))
+                    {
+                        Console.Write("■");
+                    }
+                    else
+                    {
+                        Console.Write(_map[x, y]);
+                    }
+                }
+                Console.WriteLine();
+            }
         }
 
-        public Point createFood(int _maxX, int _maxY)
+        // 경계 판별
+        private bool IsBorderCell(int x, int y)
         {
-            Random random = new Random();
-            int _randomX = random.Next(1, _maxX); // 랜덤한 X 좌표 생성 (범위 내에서)
-            int _randomY = random.Next(1, _maxY); // 랜덤한 Y 좌표 생성 (범위 내에서)
-
-            return new Point(_randomX, _randomY, sym); // 랜덤한 위치에 음식 생성
+            return x == 0 || x == _maxMapCol - 1 || y == 0 || y == _maxMapRow - 1;
         }
     }
-    // 방향을 표현하는 열거형입니다.
-    public enum Direction // enumeration 열거형, 특정한 방향을 C#
+
+    public enum Direction
     {
-        LEFT,
-        RIGHT,
         UP,
-        DOWN
+        DOWN,
+        RIGHT,
+        LEFT
     }
 }
