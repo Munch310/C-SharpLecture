@@ -7,16 +7,12 @@ namespace BlackJackGame
     {
         public int _player = 0;
         public int _dealer = 1;
-        public enum Suit { Spades, Hearts, Diamonds, Clubs }
+        public enum Suit {Spades, Hearts, Diamonds, Clubs }
         public enum Number { Two = 2, Three, Four, Five, Six, Seven, Eight, Nine, Ten = 10, Jack=10, Queen=10, King=10, Ace=11 }
         static void Main(string[] args)
         {
             Hand _h = new Hand();
-
-            
             _h.StartGame();
-
-            
         }
 
         public class Deck
@@ -41,7 +37,6 @@ namespace BlackJackGame
                     _deck[_k] = _deck[_n];
                     _deck[_n] = _temp;
                 }
-
             }
 
             public void Initdeck()
@@ -56,11 +51,11 @@ namespace BlackJackGame
                 DeckShuffle(_deck);
 
 
-                // 덱 출력 
-                foreach (var _card in _deck)
-                {
-                    Console.WriteLine($"Number:{_card.Item1}, Suit:{_card.Item2}");
-                }
+                //// 덱 출력 
+                //foreach (var _card in _deck)
+                //{
+                //    Console.WriteLine($"Number:{_card.Item1}, Suit:{_card.Item2}");
+                //}
             }
 
             public (Number, Suit) DrawCard()
@@ -95,6 +90,15 @@ namespace BlackJackGame
                 return sum;
             }
 
+            public void DesplayCards(List<Tuple<int, string>> hand)
+            {
+            }
+
+            public void Bust()
+            {
+                
+            }
+
             public void StartGame()
             {
                 Deck _d = new Deck();
@@ -118,20 +122,48 @@ namespace BlackJackGame
                 {
                     Console.WriteLine($"Number : {_dCard.Item1}, Suit : {_dCard.Item2}");
                 }
-
-                int playerSum = HandSum(_playerHand);
-                int dealerSum = HandSum(_dealerHand);
-
-                if (playerSum > 21)
+                int _playerSum = HandSum(_playerHand);
+                int _dealerSum = HandSum(_dealerHand);
+                if (_playerSum > 21)
                 {
                     Console.WriteLine("플레이어 버스트! 딜러 승리");
-                } else if (dealerSum > 21)
+                }
+                else if (_dealerSum > 21)
                 {
                     Console.WriteLine("딜러 버스트! 플레이어 승리");
                 }
-                else
+                else if(_playerSum < 21 || _dealerSum < 17)
                 {
                     Console.WriteLine("Hit");
+                    // 키보드 입력받아서 카드를 한 장 더 뽑을지 정의해야함.
+                    _playerHand.Add(_d.DrawCard());
+                    _dealerHand.Add(_d.DrawCard());
+
+                    Console.WriteLine("플레이어 카드");
+                    foreach (var _pCard in _playerHand)
+                    {
+                        Console.WriteLine($"Number : {_pCard.Item1}, Suit : {_pCard.Item2}");
+                    }
+
+                    Console.WriteLine("딜러 카드");
+                    foreach (var _dCard in _dealerHand)
+                    {
+                        Console.WriteLine($"Number : {_dCard.Item1}, Suit : {_dCard.Item2}");
+                    }
+
+                    int _newDealerSum = HandSum(_dealerHand);
+                    int _newPlyaerSum = HandSum(_playerHand);
+                    if (_newPlyaerSum > 21)
+                    {
+                        Console.WriteLine("플레이어 버스트! 딜러 승리");
+                    }
+                    else if(_newDealerSum > 21)
+                    {
+                        Console.WriteLine("딜러 버스트! 플레이어 승리");
+                    }
+
+
+
                 }
             }
         }
