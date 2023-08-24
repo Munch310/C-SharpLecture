@@ -1,171 +1,239 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using static BlackJackGame.Program;
+﻿public enum Suit { Hearts, Diamonds, Clubs, Spades }
+public enum Rank { Two = 2, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace }
 
-namespace BlackJackGame
+
+// 카드 한 장을 표현하는 클래스
+public class Card
 {
-    internal class Program
+    // 카드의 무늬를 나타냄
+    public Suit Suit { get; private set; }
+    // 카드의 숫자를 나타냄
+    public Rank Rank { get; private set; }
+
+    public Card(Suit s, Rank r)
     {
-        public int _player = 0;
-        public int _dealer = 1;
-        public enum Suit {Spades, Hearts, Diamonds, Clubs }
-        public enum Number { Two = 2, Three, Four, Five, Six, Seven, Eight, Nine, Ten = 10, Jack=10, Queen=10, King=10, Ace=11 }
-        static void Main(string[] args)
+        Suit = s;
+        Rank = r;
+    }
+
+    // 카드의 블랙잭에서의 점수를 반환하는 메소드
+    public int GetValue()
+    {
+        if ((int)Rank <= 10)
         {
-            Hand _h = new Hand();
-            _h.StartGame();
+            return (int)Rank;
         }
-
-        public class Deck
+        else if ((int)Rank <= 13)
         {
-            private List<(Number, Suit)> _deck = new List<(Number, Suit)>();
+            return 10;
+        }
+        else
+        {
+            return 11;
+        }
+    }
 
-            public Deck()
+    // 카드의 무늬와 숫자를 문자열로 반환하는 메소드
+    public override string ToString()
+    {
+        return $"{Rank} of {Suit}";
+    }
+}
+
+// 덱을 표현하는 클래스
+public class Deck
+{
+    // 덱에 있는 카드들
+    private List<Card> cards;
+
+    public Deck()
+    {
+        cards = new List<Card>();
+
+        // 모든 무늬와 숫자의 조합에 대해 카드를 생성
+        foreach (Suit s in Enum.GetValues(typeof(Suit)))
+        {
+            foreach (Rank r in Enum.GetValues(typeof(Rank)))
             {
-                Initdeck();
-            }
-            
-            // Fisher - Yates
-            public void DeckShuffle(List<(Number, Suit)> _deck)
-            {
-                Random _random = new Random();
-                int _n = _deck.Count; // 현재 덱의 개수
-                while (_n > 1) // 한 장 남을 때 까지
-                {
-                    _n--; // 현재 처리할 아이템 인덱스
-                    int _k = _random.Next(_n + 1); // 현재 덱의 개수 보다 작은 숫자, _k에 할당
-                    (Number, Suit) _temp = _deck[_k]; 
-                    _deck[_k] = _deck[_n];
-                    _deck[_n] = _temp;
-                }
-            }
-
-            public void Initdeck()
-            {
-                foreach (Number _n in Enum.GetValues(typeof(Number)))
-                {
-                    foreach (Suit _s in Enum.GetValues(typeof(Suit)))
-                    {
-                        _deck.Add((_n, _s));
-                    }
-                }
-                DeckShuffle(_deck);
-
-
-                //// 덱 출력 
-                //foreach (var _card in _deck)
-                //{
-                //    Console.WriteLine($"Number:{_card.Item1}, Suit:{_card.Item2}");
-                //}
-            }
-
-            public (Number, Suit) DrawCard()
-            {
-                if (_deck.Count > 0)
-                {
-                    (Number, Suit) card = _deck[0];
-                    _deck.RemoveAt(0);
-                    return card;
-                }
-                else
-                {
-                    // 오류 처리
-                    Console.WriteLine("덱에 카드가 없습니다.");
-                    return default((Number, Suit)); //
-                }
+                cards.Add(new Card(s, r));
             }
         }
 
-        public class Hand
+        // 카드를 섞는다
+        Shuffle();
+    }
+
+    // 카드를 섞는 메소드
+    public void Shuffle()
+    {
+        Random rand = new Random();
+
+        for (int i = 0; i < cards.Count; i++)
         {
-            protected List<(Number, Suit)> _playerHand = new List<(Number, Suit)>();
-            protected List<(Number, Suit)> _dealerHand = new List<(Number, Suit)>();
+            int j = rand.Next(i, cards.Count);
+            Card temp = cards[i];
+            cards[i] = cards[j];
+            cards[j] = temp;
+        }
+    }
 
-            public int HandSum(List<(Number, Suit)> hand)
+    // 카드 한 장을 뽑는 메소드
+    public Card DrawCard()
+    {
+        Card card = cards[0];
+        cards.RemoveAt(0);
+        return card;
+    }
+}
+
+// 플레이어의 패를 표현하는 클래스
+public class Hand
+{
+    // 패에 있는 카드들
+    private List<Card> cards;
+
+    public Hand()
+    {
+        cards = new List<Card>();
+    }
+
+    // 카드를 패에 추가하는 메소드
+    public void AddCard(Card card)
+    {
+        cards.Add(card);
+    }
+
+    // 패의 총점을 계산하는 메소드
+    public int GetTotalValue()
+    {
+        int total = 0;
+        int aceCount = 0;
+
+        foreach (Card card in cards)
+        {
+            if (card.Rank == Rank.Ace)
             {
-                int sum = 0;
-                foreach (var card in hand)
-                {
-                    sum += (int)card.Item1;
-                }
-                return sum;
+                aceCount++;
             }
+            total += card.GetValue();
+        }
 
-            public void DesplayCards(List<Tuple<int, string>> hand)
+        // 에이스가 있고 총점이 21점을 넘을 때, 에이스를 1점으로 취급
+        while (total > 21 && aceCount > 0)
+        {
+            total -= 10;
+            aceCount--;
+        }
+
+        return total;
+    }
+}
+
+// 플레이어를 표현하는 클래스
+public class Player
+{
+    // 플레이어의 패
+    public Hand Hand { get; private set; }
+
+    public Player()
+    {
+        Hand = new Hand();
+    }
+
+    // 카드를 뽑는 메소드
+    public Card DrawCardFromDeck(Deck deck)
+    {
+        Card drawnCard = deck.DrawCard();
+        Hand.AddCard(drawnCard);
+        return drawnCard;
+    }
+}
+
+// 딜러를 표현하는 클래스
+public class Dealer : Player
+{
+    // 딜러는 총점이 17점 미만일 때 계속해서 카드를 뽑는다
+    public void KeepDrawingCards(Deck deck)
+    {
+        while (Hand.GetTotalValue() < 17)
+        {
+            Card drawnCard = DrawCardFromDeck(deck);
+            Console.WriteLine($"딜러는 '{drawnCard}'을(를) 뽑았습니다. 현재 총합은 {Hand.GetTotalValue()}점입니다.");
+        }
+    }
+}
+
+// 블랙잭 게임을 표현하는 클래스
+public class Blackjack
+{
+    private Player player;
+    private Dealer dealer;
+    private Deck deck;
+
+    public void PlayGame()
+    {
+        deck = new Deck();
+        player = new Player();
+        dealer = new Dealer();
+
+        // 게임 시작, 플레이어와 딜러는 각각 두 장의 카드를 뽑는다
+        for (int i = 0; i < 2; i++)
+        {
+            player.DrawCardFromDeck(deck);
+            dealer.DrawCardFromDeck(deck);
+        }
+
+        Console.WriteLine("게임을 시작합니다!");
+        Console.WriteLine($"플레이어의 초기 카드 합: {player.Hand.GetTotalValue()}");
+        Console.WriteLine($"딜러의 초기 카드 합: {dealer.Hand.GetTotalValue()}");
+
+        // 플레이어의 차례, 21점이 넘지 않는다면 계속해서 카드를 뽑을 수 있다
+        while (player.Hand.GetTotalValue() < 21)
+        {
+            Console.Write("카드를 더 뽑으시겠습니까? (Y/N): ");
+            string input = Console.ReadLine();
+
+            if (input.ToUpper() == "Y" )
             {
+                Card drawnCard = player.DrawCardFromDeck(deck);
+                Console.WriteLine($"'{drawnCard}'을(를) 뽑았습니다. 현재 총합은 {player.Hand.GetTotalValue()}점입니다.");
             }
-
-            public void Bust()
+            else if(input.ToUpper() == "N")
             {
-                
-            }
-
-            public void StartGame()
-            {
-                Deck _d = new Deck();
-
-                _d.Initdeck();
-
-                for (int i = 0; i < 2; i++)
-                {
-                    _playerHand.Add(_d.DrawCard());
-                    _dealerHand.Add(_d.DrawCard());
-                }
-                Console.WriteLine("플레이어 카드");
-                foreach(var _pCard in _playerHand)
-                {
-                    Console.WriteLine($"Number : {_pCard.Item1}, Suit : {_pCard.Item2}");
-                    
-                }
-
-                Console.WriteLine("딜러 카드");
-                foreach (var _dCard in _dealerHand)
-                {
-                    Console.WriteLine($"Number : {_dCard.Item1}, Suit : {_dCard.Item2}");
-                }
-                int _playerSum = HandSum(_playerHand);
-                int _dealerSum = HandSum(_dealerHand);
-                if (_playerSum > 21)
-                {
-                    Console.WriteLine("플레이어 버스트! 딜러 승리");
-                }
-                else if (_dealerSum > 21)
-                {
-                    Console.WriteLine("딜러 버스트! 플레이어 승리");
-                }
-                else if(_playerSum < 21 || _dealerSum < 17)
-                {
-                    Console.WriteLine("Hit");
-                    // 키보드 입력받아서 카드를 한 장 더 뽑을지 정의해야함.
-                    _playerHand.Add(_d.DrawCard());
-                    _dealerHand.Add(_d.DrawCard());
-
-                    Console.WriteLine("플레이어 카드");
-                    foreach (var _pCard in _playerHand)
-                    {
-                        Console.WriteLine($"Number : {_pCard.Item1}, Suit : {_pCard.Item2}");
-                    }
-
-                    Console.WriteLine("딜러 카드");
-                    foreach (var _dCard in _dealerHand)
-                    {
-                        Console.WriteLine($"Number : {_dCard.Item1}, Suit : {_dCard.Item2}");
-                    }
-
-                    int _newDealerSum = HandSum(_dealerHand);
-                    int _newPlyaerSum = HandSum(_playerHand);
-                    if (_newPlyaerSum > 21)
-                    {
-                        Console.WriteLine("플레이어 버스트! 딜러 승리");
-                    }
-                    else if(_newDealerSum > 21)
-                    {
-                        Console.WriteLine("딜러 버스트! 플레이어 승리");
-                    }
-
-
-
-                }
+                break;
             }
         }
+
+        // 딜러의 차례, 총합이 17점이 넘을 때까지 계속해서 카드를 뽑는다
+        Console.WriteLine("딜러의 차례입니다.");
+        dealer.KeepDrawingCards(deck);
+        Console.WriteLine($"딜러의 총합은 {dealer.Hand.GetTotalValue()}점입니다.");
+
+        // 승자 판정
+        if (player.Hand.GetTotalValue() > 21)
+        {
+            Console.WriteLine("플레이어의 카드 합이 21점을 초과했습니다. 딜러의 승리입니다.");
+        }
+        else if (dealer.Hand.GetTotalValue() > 21)
+        {
+            Console.WriteLine("딜러의 카드 합이 21점을 초과했습니다. 플레이어의 승리입니다.");
+        }
+        else if (player.Hand.GetTotalValue() > dealer.Hand.GetTotalValue())
+        {
+            Console.WriteLine("플레이어의 카드 합이 더 높습니다. 플레이어의 승리입니다.");
+        }
+        else
+        {
+            Console.WriteLine("딜러의 카드 합이 더 높거나 같습니다. 딜러의 승리입니다.");
+        }
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Blackjack game = new Blackjack();
+        game.PlayGame();
     }
 }
