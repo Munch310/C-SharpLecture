@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Practice-SpaceComplexity", "Practice-SpaceComplexity\Practice-SpaceComplexity.csproj", "{8B434879-F819-48AE-B5E2-BDA931FCB213}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8B434879-F819-48AE-B5E2-BDA931FCB213}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B434879-F819-48AE-B5E2-BDA931FCB213}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B434879-F819-48AE-B5E2-BDA931FCB213}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B434879-F819-48AE-B5E2-BDA931FCB213}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {857AA66D-833E-4E89-8A8F-82B2CFB71EF1}
+	EndGlobalSection
+EndGlobal
